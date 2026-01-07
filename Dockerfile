@@ -6,6 +6,7 @@ FROM node:20-alpine AS builder
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+RUN node -v && npm -v && ls -la
 RUN npm ci
 
 COPY . .
