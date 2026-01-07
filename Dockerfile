@@ -11,6 +11,7 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
+
 # ======================
 # PRODUCTION STAGE
 # ======================
