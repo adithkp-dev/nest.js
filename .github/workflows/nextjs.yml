@@ -7,7 +7,7 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REPOSITORY: my-app
+  ECR_REPOSITORY: test1
 
 jobs:
   build-and-push:
