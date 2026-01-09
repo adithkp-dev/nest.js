@@ -56,7 +56,13 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY_PROD }}
           script: |
             set -e
+<<<<<<< HEAD
             ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1"
+=======
+
+            ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1"
+
+>>>>>>> 125f051f1dccfd2d550a18b482f5738973bccc23
             echo "Logging into ECR"
             aws ecr get-login-password --region ${{ secrets.AWS_REGION_PROD }} \
               | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.${{ secrets.AWS_REGION_PROD }}.amazonaws.com
