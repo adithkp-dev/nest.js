@@ -1,9 +1,11 @@
-name: Build and Push Docker Image to ECR (Production)
+name: Prod- Build and Push to ECR
 
 on:
-  push:
-    branches: ["main"]
-  workflow_dispatch:
+  pull_request:
+    types:
+      - closed  # Runs when a PR is merged into staging
+    branches:
+      - protected/prod
 
 jobs:
   build-and-push:
@@ -23,8 +25,8 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_PROD }}
+          aws-region: ${{ secrets.AWS_REGION_PROD }}
 
       - name: Verify AWS identity
         run: aws sts get-caller-identity
@@ -39,41 +41,34 @@ jobs:
           ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1"
           echo "Building image: $ECR_IMAGE"
           echo "Tag: $IMAGE_TAG"
-
           docker buildx build \
             --platform linux/amd64 \
             -t $ECR_IMAGE:$IMAGE_TAG \
             -t $ECR_IMAGE:latest \
             --push .
- # ---------------- DEPLOY TO EC2 -----------------
+ # ---------------- DEPLOY TO EC2 ------------------
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
+          host: ${{ secrets.EC2_HOST_PROD }}
+          username: ${{ secrets.EC2_USER_PROD }}
+          key: ${{ secrets.EC2_SSH_KEY_PROD }}
           script: |
             set -e
-
-            ECR_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}"
-
+            ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1"
             echo "Logging into ECR"
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} \
-              | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION_PROD }} \
+              | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID_PROD }}.dkr.ecr.${{ secrets.AWS_REGION_PROD }}.amazonaws.com
             echo "Pulling latest image"
             docker pull $ECR_IMAGE:latest
-
             echo "Stopping old container"
             docker stop app || true
             docker rm app || true
-
             echo "Starting new container"
             docker run -d \
               --name app \
               --restart always \
               -p 3000:3000 \
               $ECR_IMAGE:latest
-
             echo "Deployment completed successfully"
