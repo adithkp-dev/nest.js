@@ -36,8 +36,7 @@ jobs:
         shell: bash
         run: |
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)
-          ECR_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}"
-
+          ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1:latest"
           echo "Building image: $ECR_IMAGE"
           echo "Tag: $IMAGE_TAG"
 
