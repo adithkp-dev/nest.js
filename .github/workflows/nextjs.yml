@@ -31,13 +31,7 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
-
-      # Optional – only if your Dockerfile needs .env
-      - name: Decode Base64 and Create .env File
-        if: secrets.ENV_BASE_64 != ''
-        run: |
-          echo "${{ secrets.ENV_BASE_64 }}" | base64 -d > .env
-
+        
       - name: Build and Push Docker Image
         shell: bash
         run: |
