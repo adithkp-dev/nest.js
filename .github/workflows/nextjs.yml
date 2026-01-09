@@ -45,7 +45,7 @@ jobs:
             -t $ECR_IMAGE:$IMAGE_TAG \
             -t $ECR_IMAGE:latest \
             --push .
- # ---------------- DEPLOY TO EC2 ------------------
+ # ---------------- DEPLOY TO EC2 -----------------
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
