@@ -1,20 +1,16 @@
-name: Build and Push Docker Image to ECR 
+name: Build and Push Docker Image to ECR (Production)
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
 
-env:
-  AWS_REGION: ap-south-1
-  ECR_REPOSITORY: test1
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     permissions:
-      id-token: write
+      id-token: write   # Required for OIDC
       contents: read
 
     steps:
@@ -24,11 +20,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::273354669900:role/ecr-git
-          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Verify AWS identity
         run: aws sts get-caller-identity
@@ -36,11 +32,20 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and Push Image
+      # Optional – only if your Dockerfile needs .env
+      - name: Decode Base64 and Create .env File
+        if: secrets.ENV_BASE_64 != ''
+        run: |
+          echo "${{ secrets.ENV_BASE_64 }}" | base64 -d > .env
+
+      - name: Build and Push Docker Image
         shell: bash
         run: |
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)
-          ECR_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}"
+          ECR_IMAGE="${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY }}"
+
+          echo "Building image: $ECR_IMAGE"
+          echo "Tag: $IMAGE_TAG"
 
           docker buildx build \
             --platform linux/amd64 \
