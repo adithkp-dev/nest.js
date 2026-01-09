@@ -36,7 +36,7 @@ jobs:
         shell: bash
         run: |
           IMAGE_TAG=$(date +%Y%m%d%H%M%S)
-          ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1:latest"
+          ECR_IMAGE="273354669900.dkr.ecr.ap-south-1.amazonaws.com/test1"
           echo "Building image: $ECR_IMAGE"
           echo "Tag: $IMAGE_TAG"
 
