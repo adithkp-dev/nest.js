@@ -1,11 +1,9 @@
 name: Prod- Build and Push to ECR
 
 on:
-  pull_request:
-    types:
-      - closed  # Runs when a PR is merged into staging
-    branches:
-      - protected/prod
+  push:
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
